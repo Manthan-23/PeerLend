@@ -1,0 +1,8 @@
+peerlend-app-frontend/node_modules/
+peerlend-backend/node_modules/
+
+# Ignore log files
+*.log
+
+# Ignore environment files
+**/.env
