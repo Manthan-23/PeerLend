@@ -21,6 +21,7 @@ import {
     AccordionItem,
     AccordionTrigger,
 } from "@/components/ui/accordion"
+import { set } from 'date-fns';
 
 
 const Dashboard = () => {
@@ -56,6 +57,22 @@ const Dashboard = () => {
     const [isUPIModalOpen, setIsUPIModalOpen] = useState(false);
     const [isUPIUpdateModalOpen, setIsUPIUpdateModalOpen] = useState(false);
     const [profileModal, setProfileModal] = useState(false);
+
+
+    const [name, setName] = useState('');
+    const [phone, setPhone] = useState('');
+
+    const [occupation, setOccupation] = useState('');
+    const [incomeRange, setIncomeRange] = useState('');
+    const [sourceOfIncome, setSourceOfIncome] = useState('');
+    const [panAadhaar, setPanAadhaar] = useState('');
+
+    const [lendAmountRange, setLendAmountRange] = useState('');
+    const [interestRate, setInterestRate] = useState('');
+    const [prefLoanDuration, setPrefLoanDuration] = useState('');
+    const [riskAppetite, setRiskAppetite] = useState('');
+
+
 
     const handleOTPSubmit = () => {
         axios.post('http://localhost:3000/api/sendOTP', {
@@ -180,6 +197,76 @@ const Dashboard = () => {
     };
 
 
+    const handleProfessionalDetails = () => {
+        
+        if (occupation && incomeRange && sourceOfIncome && panAadhaar) {
+            axios.put('http://localhost:3000/api/user/prof-details-lend', {
+                upiId: upiIdState,
+                occupation: occupation,
+                incomeRange: incomeRange,
+                sourceOfIncome: sourceOfIncome,
+                panAadhaar: panAadhaar
+            })
+                .then((response) => {
+                    console.log('Professional details updated successfully:', response.data);
+                    alert('Professional details updated successfully!');
+                })
+                .catch((error) => {
+                    console.error('Error updating professional details:', error);
+                });
+        }
+        else {
+            alert('Please fill in all fields');
+        }
+    };
+
+    const handleLendingPrefDetails = () => {
+         if (lendAmountRange && interestRate && prefLoanDuration && riskAppetite) {
+            axios.put('http://localhost:3000/api/user/lending-details-lend', {
+                upiId: upiIdState,
+                lendAmountRange: lendAmountRange,
+                interestRate: interestRate,
+                prefLoanDuration: prefLoanDuration,
+                riskAppetite: riskAppetite
+            })
+                .then((response) => {
+                    console.log('Lending details updated successfully:', response.data);
+                    alert('Lending details updated successfully!');
+                    setProfileModal(false); // Close the profile modal
+                })
+                .catch((error) => {
+                    console.error('Error updating lending details:', error);
+                });
+        }
+        else {
+            alert('Please fill in all fields');
+        }
+    }
+
+
+    const getLendProfileDetails = () => {
+        axios.get(`http://localhost:3000/api/user/profile/${encodeURIComponent(upiIdState)}`)
+            .then((response) => {
+                console.log('Fetching lender profile details...', response.data);
+                const data = response.data;
+                console.log('Lender profile details fetched successfully:', data);
+                setName(data.name || '');
+                setPhone(data.phoneNumber || '');
+                setDate(data.dateOfBirth ? new Date(data.dateOfBirth) : null);
+                setOccupation(data.occupation || '');
+                setIncomeRange(data.annualIncome || '');
+                setSourceOfIncome(data.sourceOfIncome || '');
+                setPanAadhaar(data.panOrAadhaar || '');
+                setLendAmountRange(data.lendingAmountRange || '');
+                setInterestRate(data.interestRate || '');
+                setPrefLoanDuration(data.loanDuration || '');
+                setRiskAppetite(data.riskAppetite || '');
+            })
+            .catch((error) => {
+                console.error('Error fetching lender profile details:', error);
+            });
+    }
+
 
     return (
         <>
@@ -189,7 +276,7 @@ const Dashboard = () => {
 
                     <a class="flex items-center space-x-3 rtl:space-x-reverse">
                         <img src="https://flowbite.com/docs/images/logo.svg" class="h-8" alt="Flowbite Logo" />
-                        <span class="self-center text-2xl font-semibold whitespace-nowrap">InstaPay</span>
+                        <span class="self-center text-2xl font-semibold whitespace-nowrap">PeerLend</span>
                     </a>
                     <button data-collapse-toggle="navbar-default" type="button" class="inline-flex items-center p-2 w-10 h-10 justify-center text-s rounded-lg md:hidden hover:bg-gray-100 focus:outline-none focus:ring-2 focus:ring-gray-200 dark:text-gray-400 dark:hover:bg-gray-700 dark:focus:ring-gray-600" aria-controls="navbar-default" aria-expanded="false">
                         <span class="sr-only">Open main menu</span>
@@ -257,7 +344,7 @@ const Dashboard = () => {
                                                 <a
                                                     href="#"
                                                     className="block px-4 py-2 hover:bg-gray-100 dark:hover:bg-gray-600 dark:hover:text-white"
-                                                    onClick={() => setProfileModal(!profileModal)}
+                                                    onClick={() => setProfileModal(!profileModal) || getLendProfileDetails()}
                                                 >
                                                     Profile
                                                 </a>
@@ -453,12 +540,12 @@ const Dashboard = () => {
 
                                                 <div class="space-y-2">
                                                     <label for="name" class="block text-sm font-medium text-gray-900 dark:text-white">Enter your full name</label>
-                                                    <input id='name' class="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5 dark:bg-gray-600 dark:border-gray-500 dark:placeholder-gray-400 dark:text-white" placeholder="" required />
+                                                    <input id='name' defaultValue={name} onChange={(e) => setName(e.target.value)} class="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5 dark:bg-gray-600 dark:border-gray-500 dark:placeholder-gray-400 dark:text-white" placeholder="" required />
                                                 </div>
 
                                                 <div class="space-y-2">
                                                     <label for="phone" class="block text-sm font-medium text-gray-900 dark:text-white">Enter your phone number</label>
-                                                    <input id='phone' class="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5 dark:bg-gray-600 dark:border-gray-500 dark:placeholder-gray-400 dark:text-white" placeholder="" required />
+                                                    <input id='phone' defaultValue={phone} onChange={(e) => setPhone(e.target.value)} class="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5 dark:bg-gray-600 dark:border-gray-500 dark:placeholder-gray-400 dark:text-white" placeholder="" required />
                                                 </div>
 
                                                 <div class="space-y-2 flex flex-col">
@@ -505,26 +592,26 @@ const Dashboard = () => {
 
                                                     <div class="space-y-2">
                                                         <label for="name" class="block text-sm font-medium text-gray-900 dark:text-white">Occupation/Profession</label>
-                                                        <input id='name' class="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5 dark:bg-gray-600 dark:border-gray-500 dark:placeholder-gray-400 dark:text-white" placeholder="" required />
+                                                        <input id='name' defaultValue={occupation} onChange={(e) => setOccupation(e.target.value)} class="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5 dark:bg-gray-600 dark:border-gray-500 dark:placeholder-gray-400 dark:text-white" placeholder="" required />
                                                     </div>
 
                                                     <div class="space-y-2">
                                                         <label for="name" class="block text-sm font-medium text-gray-900 dark:text-white">Monthly/Annual Income (Range)</label>
-                                                        <input id='name' class="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5 dark:bg-gray-600 dark:border-gray-500 dark:placeholder-gray-400 dark:text-white" placeholder="" required />
+                                                        <input id='name' defaultValue={incomeRange} onChange={(e) => setIncomeRange(e.target.value)} class="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5 dark:bg-gray-600 dark:border-gray-500 dark:placeholder-gray-400 dark:text-white" placeholder="" required />
                                                     </div>
 
                                                     <div class="space-y-2">
                                                         <label for="name" class="block text-sm font-medium text-gray-900 dark:text-white">Source of Income</label>
-                                                        <input id='name' class="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5 dark:bg-gray-600 dark:border-gray-500 dark:placeholder-gray-400 dark:text-white" placeholder="" required />
+                                                        <input id='name' defaultValue={sourceOfIncome} onChange={(e) => setSourceOfIncome(e.target.value)} class="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5 dark:bg-gray-600 dark:border-gray-500 dark:placeholder-gray-400 dark:text-white" placeholder="" required />
                                                     </div>
 
                                                     <div class="space-y-2">
                                                         <label for="name" class="block text-sm font-medium text-gray-900 dark:text-white">PAN Card / Aadhaar</label>
-                                                        <input id='name' class="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5 dark:bg-gray-600 dark:border-gray-500 dark:placeholder-gray-400 dark:text-white" placeholder="" required />
+                                                        <input id='name' defaultValue={panAadhaar} onChange={(e) => setPanAadhaar(e.target.value)} class="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5 dark:bg-gray-600 dark:border-gray-500 dark:placeholder-gray-400 dark:text-white" placeholder="" required />
                                                     </div>
                                                 </div>
 
-                                                <Button className="w-20 bg-[#192ecd] hover:bg-[#192edd] my-5">Save</Button>
+                                                <Button className="w-20 bg-[#192ecd] hover:bg-[#192edd] my-5" onClick={() => handleProfessionalDetails()}>Save</Button>
 
                                             </div>
                                         </AccordionContent>
@@ -539,26 +626,26 @@ const Dashboard = () => {
 
                                                     <div class="space-y-2">
                                                         <label for="name" class="block text-sm font-medium text-gray-900 dark:text-white">Preferred Lending Amount Range</label>
-                                                        <input id='name' class="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5 dark:bg-gray-600 dark:border-gray-500 dark:placeholder-gray-400 dark:text-white" placeholder="" required />
+                                                        <input id='name' defaultValue={lendAmountRange} onChange={(e) => setLendAmountRange(e.target.value)} class="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5 dark:bg-gray-600 dark:border-gray-500 dark:placeholder-gray-400 dark:text-white" placeholder="" required />
                                                     </div>
 
                                                     <div class="space-y-2">
                                                         <label for="name" class="block text-sm font-medium text-gray-900 dark:text-white">Interest Rate Expectation</label>
-                                                        <input id='name' class="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5 dark:bg-gray-600 dark:border-gray-500 dark:placeholder-gray-400 dark:text-white" placeholder="" required />
+                                                        <input id='name' defaultValue={interestRate} onChange={(e) => setInterestRate(e.target.value)} class="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5 dark:bg-gray-600 dark:border-gray-500 dark:placeholder-gray-400 dark:text-white" placeholder="" required />
                                                     </div>
 
                                                     <div class="space-y-2">
                                                         <label for="name" class="block text-sm font-medium text-gray-900 dark:text-white">Preferred Loan Duration</label>
-                                                        <input id='name' class="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5 dark:bg-gray-600 dark:border-gray-500 dark:placeholder-gray-400 dark:text-white" placeholder="" required />
+                                                        <input id='name' defaultValue={prefLoanDuration} onChange={(e) => setPrefLoanDuration(e.target.value)} class="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5 dark:bg-gray-600 dark:border-gray-500 dark:placeholder-gray-400 dark:text-white" placeholder="" required />
                                                     </div>
 
                                                     <div class="space-y-2">
                                                         <label for="name" class="block text-sm font-medium text-gray-900 dark:text-white">Risk Appetite</label>
-                                                        <input id='name' class="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5 dark:bg-gray-600 dark:border-gray-500 dark:placeholder-gray-400 dark:text-white" placeholder="" required />
+                                                        <input id='name' defaultValue={riskAppetite} onChange={(e) => setRiskAppetite(e.target.value)} class="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5 dark:bg-gray-600 dark:border-gray-500 dark:placeholder-gray-400 dark:text-white" placeholder="" required />
                                                     </div>
                                                 </div>
 
-                                                <Button className="w-20 bg-[#192ecd] hover:bg-[#192edd] my-5">Save</Button>
+                                                <Button className="w-20 bg-[#192ecd] hover:bg-[#192edd] my-5"onClick={() => handleLendingPrefDetails()}>Save</Button>
 
                                             </div>
 
@@ -566,18 +653,7 @@ const Dashboard = () => {
                                     </AccordionItem>
                                 </Accordion>
 
-                                {/* <div class="flex items-center justify-between p-4 md:p-5 border-b rounded-t dark:border-gray-600 border-gray-200">
-                                    <h3 class="text-xl font-semibold text-gray-900 dark:text-white">
-                                        Basic Details
-                                    </h3>
-                                    <button type="button" class="text-gray-400 bg-transparent hover:bg-gray-200 hover:text-gray-900 rounded-lg text-sm w-8 h-8 ms-auto inline-flex justify-center items-center dark:hover:bg-gray-600 dark:hover:text-white" onClick={() => setIsModalOpen(false)}>
-                                        <svg class="w-3 h-3" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 14 14">
-                                            <path stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="m1 1 6 6m0 0 6 6M7 7l6-6M7 7l-6 6" />
-                                        </svg>
-                                        <span onClick={() => setProfileModal(false)}>Close</span>
-                                    </button>
-                                </div>
-                                {/* <!-- Modal body --> */}
+                                
 
                             </div>
                         </div>

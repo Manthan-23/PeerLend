@@ -43,10 +43,19 @@ router.route("/verifyOTP").post(
 
 router.route("/user/basic-details-lend").put(
     controller.updateBasicDetailsLend
-)
+);
 
-// router.get('/sendOTP', sendOTP);
-// router.get('/verifyOTP', verifyOTP);
+router.route("/user/prof-details-lend").put(
+    controller.updateProfDetailsLend
+);
+
+router.route("/user/lending-details-lend").put(
+    controller.updateLendingDetailsLend
+);
+
+router.route("/user/profile/:upiId").get(
+    controller.getLendProfileDetails
+);
 
 
 

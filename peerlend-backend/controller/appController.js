@@ -305,3 +305,80 @@ export async function updateBasicDetailsLend(req, res) {
 }
 
 
+
+export async function updateProfDetailsLend(req, res) {
+    const { upiId, occupation, incomeRange, sourceOfIncome, panAadhaar } = req.body;
+    console.log("Received data:", req.body);
+    try {
+        if (!upiId || !occupation || !incomeRange || !sourceOfIncome || !panAadhaar) {
+            return res.status(400).json({ message: "UPI ID, occupation, income range, source of income, and PAN/Aadhaar are required." });
+        }
+            console.log("Updating professional details for UPI ID:", upiId);
+
+        const user = await LendererModel.findOne({upiId: upiId});
+        console.log("User found:", user);
+        if (!user) {
+            return res.status(404).json({ message: "User not found." });
+        }
+
+        user.occupation = occupation;
+        user.annualIncome = incomeRange;
+        user.sourceOfIncome = sourceOfIncome;
+        user.panOrAadhaar = panAadhaar;
+
+        await user.save();
+
+        return res.status(200).json({ message: "Professional details updated successfully." });
+    } catch (error) {
+        console.error("Error updating professional details:", error);
+        return res.status(500).json({ message: "Internal server error." });
+    }
+}
+
+
+export async function updateLendingDetailsLend(req, res) {
+    const { upiId, lendAmountRange, interestRate, prefLoanDuration, riskAppetite } = req.body;
+    console.log("Received data:", req.body);
+    try {
+        if (!upiId || !lendAmountRange || !interestRate || !prefLoanDuration || !riskAppetite) {
+            return res.status(400).json({ message: "UPI ID, lending amount range, interest rate, preferred loan duration, and risk appetite are required." });
+        }
+            console.log("Updating lending details for UPI ID:", upiId);
+
+        const user = await LendererModel.findOne({upiId: upiId});
+        console.log("User found:", user);
+        if (!user) {
+            return res.status(404).json({ message: "User not found." });
+        }
+
+        user.lendingAmountRange = lendAmountRange;
+        user.interestRate = interestRate;
+        user.loanDuration = prefLoanDuration;
+        user.riskAppetite = riskAppetite;
+
+        await user.save();
+
+        return res.status(200).json({ message: "Lending details updated successfully." });
+    } catch (error) {
+        console.error("Error updating lending details:", error);
+        return res.status(500).json({ message: "Internal server error." });
+    }
+}
+
+
+export async function getLendProfileDetails(req, res) {
+    console.log(req.params);
+    const { upiId } = req.params;
+    console.log("Entered");
+    console.log("Fetching lend profile details for UPI ID:", upiId);
+    try {
+        if (!upiId) return res.status(400).send({ error: "Invalid UPI ID" });
+
+        const user = await LendererModel.findOne({ upiId: upiId });
+        if (!user) return res.status(404).send({ error: "User not found" });    
+        return res.status(200).send(user);
+    } catch (error) {
+        console.error("Error fetching lend profile details:", error);
+        return res.status(500).send({ error: "Internal server error" });
+    }
+};

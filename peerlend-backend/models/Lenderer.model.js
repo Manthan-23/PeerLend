@@ -45,7 +45,7 @@ const lendererSchema = new mongoose.Schema({
         required: false,
     },
     annualIncome: {
-        type: Number,
+        type: String,
         required: false,
     }, 
     sourceOfIncome: {
@@ -61,7 +61,7 @@ const lendererSchema = new mongoose.Schema({
         required: false,
     },
     interestRate: {
-        type: Number,
+        type: String,
         required: false,
     }, 
     loanDuration: {
